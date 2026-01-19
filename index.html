@@ -397,10 +397,10 @@
     <div class="container">
         <h1>SCL-90 症状自评量表</h1>
         <div class="subtitle">专业心理测评 · 关爱自己从了解开始</div>
-        
+
         <div class="intro">
-            指导语：以下列出了有些人可能会有的问题，请你仔细阅读每一条，然后根据最近一周内你自己的实际感觉，选择最符合你的一种情况。<br>
-            评分标准：1=没有，2=很轻，3=中等，4=偏重，5=严重
+            <strong>指导语</strong>：以下列出了有些人可能会有的问题，请你仔细阅读每一条，然后根据<strong>最近一周内</strong>你自己的实际感觉，选择最符合你的一种情况。<br><br>
+            <strong>评分标准</strong>：1=没有，2=很轻，3=中等，4=偏重，5=严重
         </div>
 
         <!-- 答题进度 -->
@@ -414,7 +414,7 @@
 
         <!-- 答题时间预估区域 -->
         <div class="time-estimate" id="time-estimate">
-            预计还需 0 分钟完成
+            预计还需 3-5 分钟完成
         </div>
 
         <!-- 题目区域 -->
@@ -708,8 +708,8 @@
                             dimension: q.dimension
                         };
                         
-                        // 记录当前题的答题耗时
-                        answeredTimes.push(currentTime - (answeredTimes.length === 0 ? startTime : currentTime));
+                        // 记录当前题的答题耗时（毫秒）
+                        answeredTimes.push(currentTime - (answeredTimes.length === 0 ? startTime : (currentTime - answeredTimes.reduce((a,b)=>a+b,0))));
                         
                         // 更新进度
                         updateProgress();
@@ -751,163 +751,156 @@
             // 计算平均每题耗时（秒）
             const totalAnsweredTime = answeredTimes.reduce((sum, time) => sum + time, 0);
             const avgTimePerQuestion = totalAnsweredTime / answeredCount / 1000;
+            // 计算剩余时间（分钟）
+            const remainingMinutes = Math.round(avgTimePerQuestion * remainingCount / 60);
             
-            // 计算剩余时间（分钟），向上取整
-            const remainingSeconds = remainingCount * avgTimePerQuestion;
-            const remainingMinutes = Math.ceil(remainingSeconds / 60);
-            
-            // 显示预估时间（最少显示1分钟）
-            const displayMinutes = remainingMinutes > 0 ? remainingMinutes : 1;
-            timeEstimateEl.textContent = `预计还需 ${displayMinutes} 分钟完成`;
+            // 显示预估时间
+            if (remainingMinutes <= 0) {
+                timeEstimateEl.textContent = `预计还需 1 分钟内完成`;
+            } else if (remainingMinutes === 1) {
+                timeEstimateEl.textContent = `预计还需 ${remainingMinutes} 分钟完成`;
+            } else {
+                timeEstimateEl.textContent = `预计还需 ${remainingMinutes} 分钟完成`;
+            }
         }
 
-        // 检查是否所有题目都已作答
+        // 检查是否所有题目都已回答
         function checkAllAnswered() {
             if (Object.keys(userAnswers).length === questions.length) {
                 submitBtn.disabled = false;
-                // 完成后更新预估时间提示
-                timeEstimateEl.textContent = `答题完成！总耗时约 ${Math.ceil((Date.now() - startTime)/60000)} 分钟`;
-            } else {
-                submitBtn.disabled = true;
+                submitBtn.addEventListener('click', calculateResults);
             }
         }
 
-        // 生成汇总性解读和情绪安抚建议
-        function generateSummary(dimensionScores) {
-            // 统计各维度严重程度
-            let normalCount = 0;
-            let mildCount = 0;
-            let moderateCount = 0;
-            let severeCount = 0;
-            let mainProblem = "";
-            let maxScore = 0;
-
-            // 遍历所有维度统计
-            Object.keys(dimensionScores).forEach(dim => {
-                const score = parseFloat(dimensionScores[dim].average);
-                if (score <= 1.5) {
-                    normalCount++;
-                } else if (score <= 2.5) {
-                    mildCount++;
-                } else if (score <= 3.5) {
-                    moderateCount++;
-                } else {
-                    severeCount++;
-                }
-
-                // 找出得分最高的维度
-                if (score > maxScore) {
-                    maxScore = score;
-                    mainProblem = dim;
-                }
-            });
-
-            // 生成汇总解读文本
-            let summaryText = "";
-            let comfortAdvice = "";
-
-            if (severeCount > 0) {
-                summaryText = `你的测评结果显示，有${severeCount}个维度存在重度症状，${moderateCount}个维度存在中度症状。当前最突出的是${mainProblem}方面的困扰，这说明你的心理状态需要重点关注。`;
-                comfortAdvice = "请不要过度焦虑，心理困扰就像身体感冒一样，是很常见的情况。重度症状提示我们需要更积极地采取行动，及时寻求专业心理咨询师或精神科医生的帮助是非常勇敢和正确的选择。请记住，关注自己的情绪健康，并不是软弱的表现，而是对自己负责的态度。";
-            } else if (moderateCount > 0) {
-                summaryText = `你的测评结果显示，有${moderateCount}个维度存在中度症状，${mildCount}个维度存在轻度症状。当前需要重点关注${mainProblem}方面的调节。`;
-                comfortAdvice = "你的心理状态整体处于需要关注的阶段，中度症状说明通过积极的自我调节和适当的支持，完全有机会得到改善。请给自己多一些耐心和包容，不必急于求成，每天做一点点积极的改变，都会让你离更好的状态更近一步。";
-            } else if (mildCount > 0) {
-                summaryText = `你的测评结果显示，有${mildCount}个维度存在轻度症状，其余维度均为正常水平。${mainProblem}方面有轻微的情绪波动，这是非常正常的现象。`;
-                comfortAdvice = "恭喜你！你的心理状态整体良好，轻度的情绪波动是每个人都会经历的。这正是提醒我们要更好地关爱自己，通过简单的自我调节方法，就能保持良好的心理状态。请继续保持积极的生活态度，你的身心状态值得被好好呵护。";
-            } else {
-                summaryText = `你的测评结果显示，所有维度均处于正常水平，这表明你的心理状态整体非常健康。`;
-                comfortAdvice = "恭喜你！你的心理状态保持得非常好，这离不开你日常对自己情绪和生活的用心经营。请继续保持现有的生活节奏和积极心态，偶尔的小情绪都是正常的，接纳自己的所有感受，就是最好的心理呵护。";
-            }
-
-            // 拼接汇总HTML
-            return `
-                <h3>测评结果汇总</h3>
-                <div class="summary-text">${summaryText}</div>
-                <div class="comfort-advice">${comfortAdvice}</div>
-            `;
-        }
-
-        // 计算评分并生成解读
-        function calculateScore() {
+        // 计算并展示结果
+        function calculateResults() {
+            // 隐藏题目区域和提交按钮
+            questionsContainer.style.display = 'none';
+            submitBtn.style.display = 'none';
+            document.querySelector('.progress').style.display = 'none';
+            timeEstimateEl.style.display = 'none';
+            
+            // 计算各维度得分
             const dimensionScores = {};
+            const dimensionCounts = {};
+            
             // 初始化
             Object.keys(dimensions).forEach(dim => {
-                dimensionScores[dim] = {
-                    total: 0,
-                    count: 0,
-                    average: 0
-                };
+                dimensionScores[dim] = 0;
+                dimensionCounts[dim] = 0;
             });
-
+            
             // 累加分数
-            for (let qId in userAnswers) {
-                const answer = userAnswers[qId];
-                dimensionScores[answer.dimension].total += answer.score;
-                dimensionScores[answer.dimension].count++;
-            }
-
+            Object.values(userAnswers).forEach(answer => {
+                dimensionScores[answer.dimension] += answer.score;
+                dimensionCounts[answer.dimension]++;
+            });
+            
             // 计算平均分
+            const dimensionAverages = {};
             Object.keys(dimensionScores).forEach(dim => {
-                if (dimensionScores[dim].count > 0) {
-                    dimensionScores[dim].average = (dimensionScores[dim].total / dimensionScores[dim].count).toFixed(2);
+                if (dimensionCounts[dim] > 0) {
+                    dimensionAverages[dim] = (dimensionScores[dim] / dimensionCounts[dim]).toFixed(2);
+                } else {
+                    dimensionAverages[dim] = 0;
                 }
             });
-
-            // 生成9项维度详细结果
+            
+            // 筛选出主要9个维度展示
+            const mainDimensions = [
+                '躯体化', '强迫症状', '人际关系敏感', '抑郁', 
+                '焦虑', '敌对', '恐怖', '偏执', '精神病性'
+            ];
+            
+            // 渲染维度结果
             let dimensionsHtml = '';
-            Object.keys(dimensions).forEach(dim => {
-                const score = dimensionScores[dim].average;
+            mainDimensions.forEach(dim => {
+                const avg = parseFloat(dimensionAverages[dim]);
                 let level = '';
-                let scoreNum = parseFloat(score);
-
+                let interpretation = '';
+                
                 // 判断严重程度
-                if (scoreNum <= 1.5) {
-                    level = "正常";
-                } else if (scoreNum <= 2.5) {
-                    level = "轻度症状";
-                } else if (scoreNum <= 3.5) {
-                    level = "中度症状";
+                if (avg <= 1.5) {
+                    level = '正常';
+                    interpretation = `你的${dim}维度得分为${avg}，处于正常范围。这表明你在该方面的心理状态良好，没有明显的不适症状。`;
+                } else if (avg <= 2.5) {
+                    level = '轻度';
+                    interpretation = `你的${dim}维度得分为${avg}，处于轻度水平。可能偶尔会感受到相关的不适，但程度较轻，对日常生活影响不大。`;
+                } else if (avg <= 3.5) {
+                    level = '中度';
+                    interpretation = `你的${dim}维度得分为${avg}，处于中度水平。相关症状较为明显，可能会对日常生活、工作或人际关系造成一定影响，建议关注并采取积极的调节措施。`;
                 } else {
-                    level = "重度症状";
+                    level = '重度';
+                    interpretation = `你的${dim}维度得分为${avg}，处于重度水平。相关症状表现突出，已明显影响到日常生活，建议尽快寻求专业心理咨询或医疗帮助。`;
                 }
-
+                
                 // 生成建议HTML
-                let suggestionHtml = '';
+                let suggestionHtml = `<p>调节建议：</p><ul>`;
                 dimensions[dim].suggestion.forEach(sug => {
                     suggestionHtml += `<li>${sug}</li>`;
                 });
-
-                // 拼接维度结果
+                suggestionHtml += `</ul>`;
+                
+                // 拼接维度HTML
                 dimensionsHtml += `
                     <div class="dimension">
                         <h3>${dim}</h3>
-                        <div class="score">平均分：${score}（${level}）</div>
-                        <div class="interpretation">评分标准：正常${dimensions[dim].normal}，轻度${dimensions[dim].mild}，中度${dimensions[dim].moderate}，重度${dimensions[dim].severe}</div>
-                        <div class="suggestion">
-                            <p>改善建议：</p>
-                            <ul>${suggestionHtml}</ul>
-                        </div>
+                        <div class="score">平均分：${avg}（${level}）</div>
+                        <div class="interpretation">${interpretation}</div>
+                        <div class="suggestion">${suggestionHtml}</div>
                     </div>
                 `;
             });
+            
             dimensionsList.innerHTML = dimensionsHtml;
-
-            // 生成汇总性解读和情绪安抚建议（重点展示）
-            summaryInterpretation.innerHTML = generateSummary(dimensionScores);
+            
+            // 生成汇总解读
+            let highScoreDimensions = [];
+            let avgScore = 0;
+            let count = 0;
+            
+            mainDimensions.forEach(dim => {
+                const avg = parseFloat(dimensionAverages[dim]);
+                avgScore += avg;
+                count++;
+                if (avg >= 2.5) {
+                    highScoreDimensions.push({
+                        name: dim,
+                        score: avg
+                    });
+                }
+            });
+            
+            avgScore = (avgScore / count).toFixed(2);
+            let summaryText = '';
+            let comfortAdvice = '';
+            
+            if (highScoreDimensions.length === 0) {
+                summaryText = `你的整体SCL-90量表平均得分为${avgScore}，所有维度均处于正常范围。这表明你的心理状态整体良好，情绪稳定，各方面适应能力正常。`;
+                comfortAdvice = `恭喜你！你的心理状态整体健康稳定。请继续保持良好的生活习惯和积极的心态，定期关注自己的心理感受，让身心健康成为生活的常态。记住，即使偶尔有小的情绪波动也是正常的，学会接纳和善待自己。`;
+            } else if (highScoreDimensions.length <= 3) {
+                summaryText = `你的整体SCL-90量表平均得分为${avgScore}，其中${highScoreDimensions.map(d => d.name).join('、')}维度得分略高（≥2.5）。这些方面可能是你需要重点关注的心理领域。`;
+                comfortAdvice = `请不必过度焦虑，每个人在不同阶段都会有不同的心理困扰。你可以根据上述各维度的调节建议，针对性地进行自我调适。如果这些不适持续存在或有所加重，及时寻求家人、朋友的支持或专业人士的帮助都是非常有益的。`;
+            } else {
+                summaryText = `你的整体SCL-90量表平均得分为${avgScore}，有${highScoreDimensions.length}个维度得分达到中度及以上水平。这表明你当前的心理状态需要重点关注，多个方面的症状可能正在影响你的生活质量。`;
+                comfortAdvice = `首先，请不要自责或恐慌，心理问题就像身体感冒一样，需要正视和治疗。建议你尽快联系专业的心理咨询师或精神科医生进行系统评估和指导。同时，也要给自己足够的耐心和关爱，改变需要时间，每一步积极的尝试都值得肯定。`;
+            }
+            
+            // 渲染汇总解读
+            summaryInterpretation.innerHTML = `
+                <h3>整体心理状态评估</h3>
+                <div class="summary-text">${summaryText}</div>
+                <div class="comfort-advice">${comfortAdvice}</div>
+            `;
+            
+            // 显示结果区域
+            result.style.display = 'block';
         }
 
-        // 绑定提交按钮事件
-        submitBtn.addEventListener('click', () => {
-            calculateScore();
-            result.style.display = 'block';
-            // 平滑滚动到结果区域
-            result.scrollIntoView({ behavior: 'smooth' });
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            initQuestions();
         });
-
-        // 初始化
-        initQuestions();
-        updateProgress();
     </script>
 </body>
 </html>
