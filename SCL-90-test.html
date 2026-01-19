@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SCL-90 症状自评量表</title>
+    <style>
+        /* 全局样式：专业温馨风格 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", "PingFang SC", sans-serif;
+        }
+
+        :root {
+            /* 专业温馨配色体系 */
+            --primary: #5b86e5; /* 主色调：柔和蓝紫 */
+            --primary-light: #839fe8;
+            --primary-gradient: linear-gradient(135deg, #5b86e5 0%, #36d1dc 100%);
+            --secondary: #f0f7ff; /* 辅助背景色 */
+            --warm: #f9e8d9; /* 温馨点缀色 */
+            --text-main: #333;
+            --text-secondary: #666;
+            --text-light: #888;
+            --border: #e0e8f0;
+            --shadow: 0 4px 12px rgba(91, 134, 229, 0.1);
+            --shadow-hover: 0 6px 16px rgba(91, 134, 229, 0.15);
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: #f8f9fc;
+            padding: 20px;
+            line-height: 1.7;
+            background-image: radial-gradient(var(--primary-light) 0.5px, transparent 0.5px);
+            background-size: 20px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px 30px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 顶部装饰条 */
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: var(--primary-gradient);
+        }
+
+        /* 标题样式 */
+        h1 {
+            text-align: center;
+            color: var(--text-main);
+            margin-bottom: 10px;
+            font-size: 26px;
+            font-weight: 600;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* 说明文字 */
+        .intro {
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            line-height: 1.8;
+            font-size: 16px;
+            padding: 20px;
+            background-color: var(--secondary);
+            border-radius: var(--radius);
+            border-left: 4px solid var(--primary);
+        }
+
+        /* 进度提示 */
+        .progress {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 6px;
+            background-color: #eee;
+            border-radius: 3px;
+            margin: 0 15px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-gradient);
+            width: 0%;
+            transition: var(--transition);
+        }
+
+        /* 预估时间样式 */
+        .time-estimate {
+            text-align: center;
+            font-size: 14px;
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding: 8px;
+            background-color: var(--secondary);
+            border-radius: 8px;
+        }
+
+        /* 题目容器 */
+        .question {
+            margin: 25px 0;
+            padding: 20px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+
+        .question:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-2px);
+        }
+
+        .question p {
+            margin-bottom: 15px;
+            color: var(--text-main);
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        /* 选项样式 */
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .option {
+            flex: 1;
+            min-width: 80px;
+            padding: 10px 0;
+            text-align: center;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+            color: var(--text-secondary);
+            background-color: white;
+        }
+
+        .option:hover {
+            background-color: var(--secondary);
+            border-color: var(--primary-light);
+            transform: translateY(-1px);
+        }
+
+        .option.selected {
+            background: var(--primary-gradient);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 2px 8px rgba(91, 134, 229, 0.2);
+        }
+
+        /* 按钮样式 */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: var(--transition);
+            box-shadow: 0 4px 8px rgba(91, 134, 229, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(91, 134, 229, 0.3);
+        }
+
+        .btn:disabled {
+            background: #e0e0e0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* 结果区域 */
+        #result {
+            display: none;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid var(--secondary);
+        }
+
+        #result h2 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 25px;
+            font-size: 20px;
+        }
+
+        /* 9项维度结果（显示，不再隐藏） */
+        .dimensions-list {
+            display: block; /* 修改为显示9项详细结果 */
+            margin-bottom: 30px;
+        }
+
+        .dimension {
+            margin: 20px 0;
+            padding: 20px;
+            background: var(--secondary);
+            border-radius: var(--radius);
+            border-left: 4px solid var(--primary);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .dimension:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        .dimension h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .score {
+            color: #e67e22;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .interpretation {
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .suggestion {
+            color: #27ae60;
+            font-size: 15px;
+            padding: 15px;
+            background-color: #f0fdf4;
+            border-radius: 8px;
+            border-left: 3px solid #27ae60;
+        }
+
+        .suggestion p {
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .suggestion ul {
+            padding-left: 20px;
+            line-height: 1.8;
+        }
+
+        .suggestion li {
+            margin-bottom: 5px;
+        }
+
+        /* 汇总性解读和情绪安抚建议（重点展示） */
+        .summary-interpretation {
+            margin: 30px 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #f0f7ff 0%, #f9e8d9 100%);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .summary-interpretation h3 {
+            color: #d35400;
+            font-size: 22px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .summary-text {
+            color: var(--text-main);
+            font-size: 17px;
+            line-height: 1.9;
+            margin-bottom: 20px;
+        }
+
+        .comfort-advice {
+            color: #27ae60;
+            font-size: 16px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            line-height: 1.8;
+        }
+
+        /* 提示和免责声明样式 */
+        .disclaimer {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .disclaimer h4 {
+            color: #e74c3c;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        /* 适配手机端 */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 25px 15px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .intro {
+                padding: 15px;
+                font-size: 15px;
+            }
+
+            .question {
+                padding: 15px;
+                margin: 20px 0;
+            }
+
+            .option {
+                min-width: 70px;
+                padding: 8px 0;
+                font-size: 13px;
+            }
+
+            .summary-interpretation {
+                padding: 20px 15px;
+            }
+
+            .summary-text {
+                font-size: 16px;
+            }
+
+            .disclaimer {
+                padding: 15px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SCL-90 症状自评量表</h1>
+        <div class="subtitle">专业心理测评 · 关爱自己从了解开始</div>
+        
+        <div class="intro">
+            指导语：以下列出了有些人可能会有的问题，请你仔细阅读每一条，然后根据最近一周内你自己的实际感觉，选择最符合你的一种情况。<br>
+            评分标准：1=没有，2=很轻，3=中等，4=偏重，5=严重
+        </div>
+
+        <!-- 答题进度 -->
+        <div class="progress">
+            <span id="progress-text">已完成 0/90 题</span>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <span id="progress-percent">0%</span>
+        </div>
+
+        <!-- 答题时间预估区域 -->
+        <div class="time-estimate" id="time-estimate">
+            预计还需 0 分钟完成
+        </div>
+
+        <!-- 题目区域 -->
+        <div id="questions">
+            <!-- 题目会通过JS动态生成 -->
+        </div>
+
+        <!-- 提交按钮 -->
+        <button id="submitBtn" class="btn" disabled>提交答案</button>
+
+        <!-- 结果区域 -->
+        <div id="result">
+            <h2>测评结果解读</h2>
+            <!-- 9项维度详细结果（恢复显示） -->
+            <div class="dimensions-list" id="dimensionsList"></div>
+            <!-- 汇总性解读和情绪安抚建议（重点展示） -->
+            <div class="summary-interpretation" id="summaryInterpretation"></div>
+            <!-- 提示和免责声明（恢复第一版内容） -->
+            <div class="disclaimer">
+                <h4>重要提示</h4>
+                <p>1. 本测评结果仅作为心理状态参考，不能替代专业的心理诊断或医疗建议。</p>
+                <p>2. 若你在多个维度得分较高（≥3.5），或持续感到心理不适，建议及时联系专业心理咨询师或精神科医生。</p>
+                <p>3. 心理健康需要长期关注和维护，任何时候寻求帮助都是勇敢且正确的选择。</p>
+                <p>4. 本量表的解读基于通用常模，个体差异可能导致结果偏差，请理性看待。</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // SCL-90题目库
+        const questions = [
+            { id: 1, text: "头痛", dimension: "躯体化" },
+            { id: 2, text: "神经过敏，心中不踏实", dimension: "强迫症状" },
+            { id: 3, text: "头脑中有不必要的想法或字句盘旋", dimension: "强迫症状" },
+            { id: 4, text: "头昏或昏倒", dimension: "躯体化" },
+            { id: 5, text: "对异性的兴趣减退", dimension: "人际关系敏感" },
+            { id: 6, text: "对旁人责备求全", dimension: "人际关系敏感" },
+            { id: 7, text: "感到别人能控制你的思想", dimension: "偏执" },
+            { id: 8, text: "责怪别人制造麻烦", dimension: "人际关系敏感" },
+            { id: 9, text: "忘记性大", dimension: "躯体化" },
+            { id: 10, text: "担心自己的衣饰整齐及仪态的端正", dimension: "强迫症状" },
+            { id: 11, text: "容易烦恼和激动", dimension: "焦虑" },
+            { id: 12, text: "胸痛", dimension: "躯体化" },
+            { id: 13, text: "害怕空旷的场所或街道", dimension: "恐怖" },
+            { id: 14, text: "感到自己的精力下降，活动减慢", dimension: "抑郁" },
+            { id: 15, text: "想结束自己的生命", dimension: "抑郁" },
+            { id: 16, text: "听到旁人听不到的声音", dimension: "精神病性" },
+            { id: 17, text: "发抖", dimension: "焦虑" },
+            { id: 18, text: "感到大多数人都不可信任", dimension: "偏执" },
+            { id: 19, text: "胃口不好", dimension: "躯体化" },
+            { id: 20, text: "容易哭泣", dimension: "抑郁" },
+            { id: 21, text: "同异性相处时感到害羞不自在", dimension: "人际关系敏感" },
+            { id: 22, text: "感到受骗，中了圈套或有人想抓住你", dimension: "偏执" },
+            { id: 23, text: "无缘无故地突然感到害怕", dimension: "焦虑" },
+            { id: 24, text: "自己不能控制地大发脾气", dimension: "焦虑" },
+            { id: 25, text: "怕单独出门", dimension: "恐怖" },
+            { id: 26, text: "经常责怪自己", dimension: "抑郁" },
+            { id: 27, text: "腰痛", dimension: "躯体化" },
+            { id: 28, text: "感到难以完成任务", dimension: "抑郁" },
+            { id: 29, text: "感到孤独", dimension: "人际关系敏感" },
+            { id: 30, text: "感到苦闷", dimension: "抑郁" },
+            { id: 31, text: "过分担忧", dimension: "焦虑" },
+            { id: 32, text: "对事物不感兴趣", dimension: "抑郁" },
+            { id: 33, text: "感到害怕", dimension: "恐怖" },
+            { id: 34, text: "你的感情容易受到伤害", dimension: "人际关系敏感" },
+            { id: 35, text: "旁人能知道你的私下想法", dimension: "精神病性" },
+            { id: 36, text: "感到别人不理解你、不同情你", dimension: "人际关系敏感" },
+            { id: 37, text: "感到人们对你不友好，不喜欢你", dimension: "人际关系敏感" },
+            { id: 38, text: "做事必须做得很慢以保证做得正确", dimension: "强迫症状" },
+            { id: 39, text: "心跳得很厉害", dimension: "躯体化" },
+            { id: 40, text: "恶心或胃部不舒服", dimension: "躯体化" },
+            { id: 41, text: "感到比不上他人", dimension: "人际关系敏感" },
+            { id: 42, text: "肌肉酸痛", dimension: "躯体化" },
+            { id: 43, text: "感到有人在监视你、谈论你", dimension: "偏执" },
+            { id: 44, text: "难以入睡", dimension: "睡眠障碍" },
+            { id: 45, text: "做事必须反复检查", dimension: "强迫症状" },
+            { id: 46, text: "难以做出决定", dimension: "强迫症状" },
+            { id: 47, text: "怕乘电车、公共汽车、地铁或火车", dimension: "恐怖" },
+            { id: 48, text: "呼吸有困难", dimension: "躯体化" },
+            { id: 49, text: "一阵阵发冷或发热", dimension: "躯体化" },
+            { id: 50, text: "因为感到害怕而避开某些东西、场合或活动", dimension: "恐怖" },
+            { id: 51, text: "脑子变空了", dimension: "抑郁" },
+            { id: 52, text: "身体发麻或刺痛", dimension: "躯体化" },
+            { id: 53, text: "喉咙有梗塞感", dimension: "躯体化" },
+            { id: 54, text: "感到前途没有希望", dimension: "抑郁" },
+            { id: 55, text: "不能集中注意力", dimension: "强迫症状" },
+            { id: 56, text: "感到身体的某一部分软弱无力", dimension: "躯体化" },
+            { id: 57, text: "感到紧张或容易紧张", dimension: "焦虑" },
+            { id: 58, text: "感到手或脚发重", dimension: "躯体化" },
+            { id: 59, text: "想到死亡的事", dimension: "抑郁" },
+            { id: 60, text: "吃得太多", dimension: "饮食障碍" },
+            { id: 61, text: "当别人看着你或谈论你时感到不自在", dimension: "人际关系敏感" },
+            { id: 62, text: "有一些不属于你自己的想法", dimension: "精神病性" },
+            { id: 63, text: "有想打人或伤害他人的冲动", dimension: "敌对" },
+            { id: 64, text: "醒得太早", dimension: "睡眠障碍" },
+            { id: 65, text: "必须反复洗手、点数目或触摸某些东西", dimension: "强迫症状" },
+            { id: 66, text: "睡得不稳不深", dimension: "睡眠障碍" },
+            { id: 67, text: "有想摔坏或破坏东西的冲动", dimension: "敌对" },
+            { id: 68, text: "有一些别人没有的想法或念头", dimension: "精神病性" },
+            { id: 69, text: "感到对别人神经过敏", dimension: "人际关系敏感" },
+            { id: 70, text: "在商店或电影院等人多的地方感到不自在", dimension: "恐怖" },
+            { id: 71, text: "感到任何事情都很困难", dimension: "抑郁" },
+            { id: 72, text: "一阵阵恐惧或惊恐", dimension: "焦虑" },
+            { id: 73, text: "感到在公共场合吃东西很不舒服", dimension: "恐怖" },
+            { id: 74, text: "经常与人争论", dimension: "敌对" },
+            { id: 75, text: "单独一人时神经很紧张", dimension: "恐怖" },
+            { id: 76, text: "别人对你的成绩没有做出恰当的评价", dimension: "偏执" },
+            { id: 77, text: "即使和别人在一起也感到孤单", dimension: "抑郁" },
+            { id: 78, text: "感到坐立不安、心神不定", dimension: "焦虑" },
+            { id: 79, text: "感到自己没有什么价值", dimension: "抑郁" },
+            { id: 80, text: "感到熟悉的东西变成陌生或不象是真的", dimension: "精神病性" },
+            { id: 81, text: "大叫或摔东西", dimension: "敌对" },
+            { id: 82, text: "害怕会在公共场合昏倒", dimension: "恐怖" },
+            { id: 83, text: "感到别人想占你的便宜", dimension: "偏执" },
+            { id: 84, text: "为一些有关性的想法而很苦恼", dimension: "精神病性" },
+            { id: 85, text: "你认为应该因为自己的过错而受到惩罚", dimension: "抑郁" },
+            { id: 86, text: "感到要很快把事情做完", dimension: "焦虑" },
+            { id: 87, text: "感到自己的身体有严重问题", dimension: "躯体化" },
+            { id: 88, text: "从未感到和其他人很亲近", dimension: "人际关系敏感" },
+            { id: 89, text: "感到自己有罪", dimension: "抑郁" },
+            { id: 90, text: "感到自己的脑子有毛病", dimension: "精神病性" }
+        ];
+
+        // 症状维度配置
+        const dimensions = {
+            躯体化: {
+                normal: "≤1.5",
+                mild: "1.5-2.5",
+                moderate: "2.5-3.5",
+                severe: ">3.5",
+                suggestion: [
+                    "每日保证30分钟中等强度运动（如快走、瑜伽），缓解身体紧绷感",
+                    "规律作息，每天固定时间起床/睡觉，避免熬夜",
+                    "当身体出现不适时，先做3次深呼吸（吸气4秒→屏息4秒→呼气6秒），观察症状是否缓解"
+                ]
+            },
+            强迫症状: {
+                normal: "≤1.5",
+                mild: "1.5-2.5",
+                moderate: "2.5-3.5",
+                severe: ">3.5",
+                suggestion: [
+                    "当强迫想法出现时，尝试“延迟响应”：告诉自己“10分钟后再处理这个想法”，转移注意力做简单家务",
+                    "每天留15分钟“专门思考时间”，只在这个时间段处理强迫想法，其余时间出现则记录下来",
+                    "减少过度检查/重复行为，每次只检查1次，逐步降低重复频率"
+                ]
+            },
+            人际关系敏感: {
+                normal: "≤1.5",
+                mild: "1.5-2.5",
+                moderate: "2.5-3.5",
+                severe: ">3.5",
+                suggestion: [
+                    "每天和1位熟悉的人做5分钟轻松聊天（不谈敏感话题），逐步建立社交安全感",
+                    "当感到被否定时，写下“事实”vs“我的想法”，区分客观事实和主观解读",
+                    "学习简单的社交小技巧：对话时多提问（如“你觉得这件事怎么样？”），减少自我关注"
+                ]
+            },
+            抑郁: {
+                normal: "≤1.5",
+                mild: "1.5-2.5",
+                moderate: "2.5-3.5",
+                severe: ">3.5",
+                suggestion: [
+                    "每天完成1件“小任务”（如整理桌面、浇花），积累成就感",
+                    "保证每天20分钟晒太阳，促进血清素分泌",
+                    "当有消极想法时，记录下来并替换成1个中性/积极的替代想法（如“我做不好”→“我可以慢慢尝试”）"
+                ]
+            },
+            焦虑: {
+                normal: "≤1.5",
+                mild: "1.5-2.5",
+                moderate: "2.5-3.5",
+                severe: ">3.5",
+                suggestion: [
+                    "学习“478呼吸法”：吸气4秒→屏息7秒→呼气8秒，每天练习3组",
+                    "当焦虑感出现时，做5分钟“身体扫描”：从脚尖到头顶依次关注身体感受，拉回当下",
+                    "减少对未来的过度担忧，每天只规划当天的1-2件核心事"
+                ]
+            },
+            敌对: {
+                normal: "≤1.5",
+                mild: "1.5-2.5",
+                moderate: "2.5-3.5",
+                severe: ">3.5",
+                suggestion: [
+                    "感到愤怒时，先暂停说话，喝口水，数到10再回应",
+                    "每天记录1件让自己感激的小事，培养正向情绪",
+                    "用“我感到…因为…”的句式表达情绪（如“我感到生气，因为这件事超出了我的预期”），而非指责他人"
+                ]
+            },
+            恐怖: {
+                normal: "≤1.5",
+                mild: "1.5-2.5",
+                moderate: "2.5-3.5",
+                severe: ">3.5",
+                suggestion: [
+                    "采用“系统脱敏”：从最轻微的恐惧场景开始，每次停留到不适感降低后再进阶",
+                    "出门前做5分钟正念练习，稳定情绪状态",
+                    "准备1个“安心物”（如小挂件、纸巾），感到害怕时触摸，建立安全感"
+                ]
+            },
+            偏执: {
+                normal: "≤1.5",
+                mild: "1.5-2.5",
+                moderate: "2.5-3.5",
+                severe: ">3.5",
+                suggestion: [
+                    "当出现偏执想法时，列出3个支持/反对这个想法的客观证据",
+                    "每周和1位信任的人交流1次，听听不同的观点",
+                    "减少过度解读，不确定时直接礼貌询问（如“你刚才说的这句话，是这个意思吗？”）"
+                ]
+            },
+            精神病性: {
+                normal: "≤1.5",
+                mild: "1.5-2.5",
+                moderate: "2.5-3.5",
+                severe: ">3.5",
+                suggestion: [
+                    "保证充足睡眠，避免熬夜和过度疲劳",
+                    "减少咖啡因、酒精摄入，避免刺激神经系统",
+                    "如果异常感知频繁出现，及时寻求专业心理/精神科帮助"
+                ]
+            },
+            睡眠障碍: {
+                normal: "≤1.5",
+                mild: "1.5-2.5",
+                moderate: "2.5-3.5",
+                severe: ">3.5",
+                suggestion: [
+                    "建立睡前仪式：睡前1小时远离电子设备，可阅读纸质书、听白噪音",
+                    "固定上床/起床时间，即使周末也不超过30分钟偏差",
+                    "卧室只用于睡眠，避免在床上工作/刷手机"
+                ]
+            },
+            饮食障碍: {
+                normal: "≤1.5",
+                mild: "1.5-2.5",
+                moderate: "2.5-3.5",
+                severe: ">3.5",
+                suggestion: [
+                    "规律三餐，每餐固定时间、固定份量，避免暴饮暴食/过度节食",
+                    "吃饭时专注进食，不看手机/电视，感受饱腹感",
+                    "记录饮食日记，了解自己的饮食触发因素（如情绪低落时想吃甜食）"
+                ]
+            }
+        };
+
+        // 全局变量
+        let userAnswers = {};
+        const questionsContainer = document.getElementById('questions');
+        const submitBtn = document.getElementById('submitBtn');
+        const result = document.getElementById('result');
+        const dimensionsList = document.getElementById('dimensionsList');
+        const summaryInterpretation = document.getElementById('summaryInterpretation');
+        const progressText = document.getElementById('progress-text');
+        const progressFill = document.getElementById('progress-fill');
+        const progressPercent = document.getElementById('progress-percent');
+        // 时间预估相关变量
+        const timeEstimateEl = document.getElementById('time-estimate');
+        let startTime = Date.now(); // 答题开始时间
+        let answeredTimes = []; // 存储每道题的答题时间
+
+        // 初始化题目
+        function initQuestions() {
+            questions.forEach(q => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                questionDiv.innerHTML = `
+                    <p>${q.id}. ${q.text}</p>
+                    <div class="options">
+                        <div class="option" data-score="1">没有</div>
+                        <div class="option" data-score="2">很轻</div>
+                        <div class="option" data-score="3">中等</div>
+                        <div class="option" data-score="4">偏重</div>
+                        <div class="option" data-score="5">严重</div>
+                    </div>
+                `;
+                
+                // 绑定选项点击事件
+                const options = questionDiv.querySelectorAll('.option');
+                options.forEach(option => {
+                    option.addEventListener('click', () => {
+                        const currentTime = Date.now();
+                        options.forEach(opt => opt.classList.remove('selected'));
+                        option.classList.add('selected');
+                        
+                        // 保存答案
+                        userAnswers[q.id] = {
+                            score: parseInt(option.dataset.score),
+                            dimension: q.dimension
+                        };
+                        
+                        // 记录当前题的答题耗时
+                        answeredTimes.push(currentTime - (answeredTimes.length === 0 ? startTime : currentTime));
+                        
+                        // 更新进度
+                        updateProgress();
+                        // 更新时间预估
+                        updateTimeEstimate();
+                        // 检查是否完成
+                        checkAllAnswered();
+                    });
+                });
+
+                questionsContainer.appendChild(questionDiv);
+            });
+        }
+
+        // 更新答题进度
+        function updateProgress() {
+            const answeredCount = Object.keys(userAnswers).length;
+            const totalCount = questions.length;
+            const percent = Math.round((answeredCount / totalCount) * 100);
+            
+            // 更新文本
+            progressText.textContent = `已完成 ${answeredCount}/${totalCount} 题`;
+            progressPercent.textContent = `${percent}%`;
+            // 更新进度条
+            progressFill.style.width = `${percent}%`;
+        }
+
+        // 更新答题时间预估
+        function updateTimeEstimate() {
+            const answeredCount = Object.keys(userAnswers).length;
+            const remainingCount = questions.length - answeredCount;
+            
+            // 至少答5题后才开始预估（避免初期数据不准）
+            if (answeredCount < 5) {
+                timeEstimateEl.textContent = `预计还需 3-5 分钟完成`;
+                return;
+            }
+            
+            // 计算平均每题耗时（秒）
+            const totalAnsweredTime = answeredTimes.reduce((sum, time) => sum + time, 0);
+            const avgTimePerQuestion = totalAnsweredTime / answeredCount / 1000;
+            
+            // 计算剩余时间（分钟），向上取整
+            const remainingSeconds = remainingCount * avgTimePerQuestion;
+            const remainingMinutes = Math.ceil(remainingSeconds / 60);
+            
+            // 显示预估时间（最少显示1分钟）
+            const displayMinutes = remainingMinutes > 0 ? remainingMinutes : 1;
+            timeEstimateEl.textContent = `预计还需 ${displayMinutes} 分钟完成`;
+        }
+
+        // 检查是否所有题目都已作答
+        function checkAllAnswered() {
+            if (Object.keys(userAnswers).length === questions.length) {
+                submitBtn.disabled = false;
+                // 完成后更新预估时间提示
+                timeEstimateEl.textContent = `答题完成！总耗时约 ${Math.ceil((Date.now() - startTime)/60000)} 分钟`;
+            } else {
+                submitBtn.disabled = true;
+            }
+        }
+
+        // 生成汇总性解读和情绪安抚建议
+        function generateSummary(dimensionScores) {
+            // 统计各维度严重程度
+            let normalCount = 0;
+            let mildCount = 0;
+            let moderateCount = 0;
+            let severeCount = 0;
+            let mainProblem = "";
+            let maxScore = 0;
+
+            // 遍历所有维度统计
+            Object.keys(dimensionScores).forEach(dim => {
+                const score = parseFloat(dimensionScores[dim].average);
+                if (score <= 1.5) {
+                    normalCount++;
+                } else if (score <= 2.5) {
+                    mildCount++;
+                } else if (score <= 3.5) {
+                    moderateCount++;
+                } else {
+                    severeCount++;
+                }
+
+                // 找出得分最高的维度
+                if (score > maxScore) {
+                    maxScore = score;
+                    mainProblem = dim;
+                }
+            });
+
+            // 生成汇总解读文本
+            let summaryText = "";
+            let comfortAdvice = "";
+
+            if (severeCount > 0) {
+                summaryText = `你的测评结果显示，有${severeCount}个维度存在重度症状，${moderateCount}个维度存在中度症状。当前最突出的是${mainProblem}方面的困扰，这说明你的心理状态需要重点关注。`;
+                comfortAdvice = "请不要过度焦虑，心理困扰就像身体感冒一样，是很常见的情况。重度症状提示我们需要更积极地采取行动，及时寻求专业心理咨询师或精神科医生的帮助是非常勇敢和正确的选择。请记住，关注自己的情绪健康，并不是软弱的表现，而是对自己负责的态度。";
+            } else if (moderateCount > 0) {
+                summaryText = `你的测评结果显示，有${moderateCount}个维度存在中度症状，${mildCount}个维度存在轻度症状。当前需要重点关注${mainProblem}方面的调节。`;
+                comfortAdvice = "你的心理状态整体处于需要关注的阶段，中度症状说明通过积极的自我调节和适当的支持，完全有机会得到改善。请给自己多一些耐心和包容，不必急于求成，每天做一点点积极的改变，都会让你离更好的状态更近一步。";
+            } else if (mildCount > 0) {
+                summaryText = `你的测评结果显示，有${mildCount}个维度存在轻度症状，其余维度均为正常水平。${mainProblem}方面有轻微的情绪波动，这是非常正常的现象。`;
+                comfortAdvice = "恭喜你！你的心理状态整体良好，轻度的情绪波动是每个人都会经历的。这正是提醒我们要更好地关爱自己，通过简单的自我调节方法，就能保持良好的心理状态。请继续保持积极的生活态度，你的身心状态值得被好好呵护。";
+            } else {
+                summaryText = `你的测评结果显示，所有维度均处于正常水平，这表明你的心理状态整体非常健康。`;
+                comfortAdvice = "恭喜你！你的心理状态保持得非常好，这离不开你日常对自己情绪和生活的用心经营。请继续保持现有的生活节奏和积极心态，偶尔的小情绪都是正常的，接纳自己的所有感受，就是最好的心理呵护。";
+            }
+
+            // 拼接汇总HTML
+            return `
+                <h3>测评结果汇总</h3>
+                <div class="summary-text">${summaryText}</div>
+                <div class="comfort-advice">${comfortAdvice}</div>
+            `;
+        }
+
+        // 计算评分并生成解读
+        function calculateScore() {
+            const dimensionScores = {};
+            // 初始化
+            Object.keys(dimensions).forEach(dim => {
+                dimensionScores[dim] = {
+                    total: 0,
+                    count: 0,
+                    average: 0
+                };
+            });
+
+            // 累加分数
+            for (let qId in userAnswers) {
+                const answer = userAnswers[qId];
+                dimensionScores[answer.dimension].total += answer.score;
+                dimensionScores[answer.dimension].count++;
+            }
+
+            // 计算平均分
+            Object.keys(dimensionScores).forEach(dim => {
+                if (dimensionScores[dim].count > 0) {
+                    dimensionScores[dim].average = (dimensionScores[dim].total / dimensionScores[dim].count).toFixed(2);
+                }
+            });
+
+            // 生成9项维度详细结果
+            let dimensionsHtml = '';
+            Object.keys(dimensions).forEach(dim => {
+                const score = dimensionScores[dim].average;
+                let level = '';
+                let scoreNum = parseFloat(score);
+
+                // 判断严重程度
+                if (scoreNum <= 1.5) {
+                    level = "正常";
+                } else if (scoreNum <= 2.5) {
+                    level = "轻度症状";
+                } else if (scoreNum <= 3.5) {
+                    level = "中度症状";
+                } else {
+                    level = "重度症状";
+                }
+
+                // 生成建议HTML
+                let suggestionHtml = '';
+                dimensions[dim].suggestion.forEach(sug => {
+                    suggestionHtml += `<li>${sug}</li>`;
+                });
+
+                // 拼接维度结果
+                dimensionsHtml += `
+                    <div class="dimension">
+                        <h3>${dim}</h3>
+                        <div class="score">平均分：${score}（${level}）</div>
+                        <div class="interpretation">评分标准：正常${dimensions[dim].normal}，轻度${dimensions[dim].mild}，中度${dimensions[dim].moderate}，重度${dimensions[dim].severe}</div>
+                        <div class="suggestion">
+                            <p>改善建议：</p>
+                            <ul>${suggestionHtml}</ul>
+                        </div>
+                    </div>
+                `;
+            });
+            dimensionsList.innerHTML = dimensionsHtml;
+
+            // 生成汇总性解读和情绪安抚建议（重点展示）
+            summaryInterpretation.innerHTML = generateSummary(dimensionScores);
+        }
+
+        // 绑定提交按钮事件
+        submitBtn.addEventListener('click', () => {
+            calculateScore();
+            result.style.display = 'block';
+            // 平滑滚动到结果区域
+            result.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // 初始化
+        initQuestions();
+        updateProgress();
+    </script>
+</body>
+</html>
